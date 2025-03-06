@@ -1,0 +1,66 @@
+import pygame
+pygame.init()
+
+width, height = 800, 600
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Demo")
+
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+blue = (0, 0, 255)
+
+font = pygame.font.SysFont("Comic Sans MS", 15)
+
+left_texts = ["Player 1 Score : 0", "Bullet : 0 "]
+right_texts = ["Player 2 Score : 0", "Bullet :0 "]
+
+
+colors = [red,  blue]  
+
+left_time = 60  
+right_time = 60  
+
+
+clock = pygame.time.Clock()
+
+
+running = True
+while running:
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    
+    left_time = max(0, left_time - 1 / 60)
+    right_time = max(0, right_time - 1 / 60)
+
+    
+    screen.fill(white)
+
+  
+    left_timer = font.render(f"Time: {int(left_time)}", True, black)
+    right_timer = font.render(f"Time: {int(right_time)}", True, black)
+    screen.blit(left_timer, (20, 10))
+    screen.blit(right_timer, (width - 180, 10))
+
+    start_y = 30
+    
+    for i in range(len(left_texts)):  
+        
+        left_rendered = font.render(left_texts[i], True, colors[i])
+        screen.blit(left_rendered, (20, start_y))
+
+        
+        right_rendered = font.render(right_texts[i], True, colors[i])
+        screen.blit(right_rendered, (width - 180, start_y))
+
+       
+        start_y += left_rendered.get_height()
+    
+    pygame.display.flip()
+    
+    clock.tick(60)
+
+pygame.quit()
