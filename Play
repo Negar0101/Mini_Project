@@ -15,6 +15,7 @@ green = (0, 255, 0)
 blue = (0, 0, 255)
 
 targets = []
+bars = []
 
 def check_target(new_x, new_y):
     for target in targets:
@@ -51,12 +52,12 @@ class Player:
         self.color = color
         self.keys = keys
         self.save_key = save_key
-        self.dots = []  
-        self.bullet = 10  
-        self.time = 60 
+        self.dots = []
+        self.bullet = 10
+        self.time = 60
 
     def move(self, event):
-        if event.type == pygame.KEYDOWN:  
+        if event.type == pygame.KEYDOWN:
             newx = self.x
             newy = self.y
             if event.key == self.keys["left"]:
@@ -83,38 +84,37 @@ class Player:
 class Score(Player):
     def __init__(self, color, keys, save_key):
         super().__init__(color, keys, save_key)
-        self.nx = self.x 
-        self.ny = self.y  
-        self.score = 0    
+        self.nx = self.x
+        self.ny = self.y
+        self.score = 0
+
     def update_position(self):
-        
         self.nx = self.x
         self.ny = self.y
 
-    def shoot(self, targets):
+    def shoot(self, targets, bars):
         if self.bullet > 0:
-           
-            self.dots.append([self.x, self.y, 0])
+            self.dots.append([self.x, self.y, 0]) 
             self.bullet -= 1
             print(f"Shot fired! Bullets left: {self.bullet}")
 
             
+            for bar in bars:
+                if bar.check_hit(self.x, self.y):
+                    self.bullet -= 1
+                    print("Hit a bar! -1 point")
+                    return
+
+            
             for target in targets:
                 d = math.sqrt((target.x - self.x) ** 2 + (target.y - self.y) ** 2)
-                print(f"Distance to target: {d}")
-                if d <= 35:  
-                    self.dots[-1][2] = 1 
+                if d <= 35:
+                    self.dots[-1][2] = 1
                     targets.remove(target)
-                    new_target = Target()
-                    targets.append(new_target)
-
-                    
-                    if len(self.dots) > 1: 
+                    targets.append(Target())
+                    if len(self.dots) > 1:
                         last_dot = self.dots[-2]
                         nd = math.sqrt((self.x - last_dot[0]) ** 2 + (self.y - last_dot[1]) ** 2)
-                        print(f"Distance from last shot: {nd}")
-
-                        
                         if 0 < nd <= 200:
                             self.score += 1
                         elif 200 < nd <= 400:
@@ -125,60 +125,74 @@ class Score(Player):
                             self.score += 4
                         elif 800 < nd <= 1000:
                             self.score += 5
-
-                       
                         if last_dot[2] == 1:
                             self.score += 2
                             print("Bonus +2 for consecutive hits!")
                     else:
-                        
                         self.score += 1
-
                     break
 
+class Bar:
+    def __init__(self):
+        self.width = 70
+        self.height = 20
+        self.color = black
+        self.position()
+
+    def position(self):
+        self.x = random.randint(0, width - self.width)
+        self.y = random.randint(0, height - self.height)
+
+    def draw_line(self, screen):
+        pygame.draw.rect(screen, self.color, [self.x, self.y, self.width, self.height])
+
+    def check_hit(self, shot_x, shot_y):
+        for x in range(shot_x - 5, shot_x + 5):
+            for y in range(shot_y - 5, shot_y + 5):
+                if self.x < x < self.x + self.width and self.y < y < self.y + self.height:
+                    return True
+        return False
+
+for j in range(4):
+    bars.append(Bar())
 
 player1 = Score(red, {"left": pygame.K_LEFT, "right": pygame.K_RIGHT, "up": pygame.K_UP, "down": pygame.K_DOWN}, pygame.K_TAB)
 player2 = Score(blue, {"left": pygame.K_a, "right": pygame.K_d, "up": pygame.K_w, "down": pygame.K_s}, pygame.K_RETURN)
 
 font = pygame.font.SysFont("Comic Sans MS", 15)
-left_texts = [f"Player 1 Score: {player1.score}", f"Bullet: {player1.bullet}"]
-right_texts = [f"Player 2 Score: {player2.score}", f"Bullet: {player2.bullet}"]
-
 clock = pygame.time.Clock()
 
 running = True
 while running:
     screen.fill(white)
-    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        
+
         if event.type == pygame.KEYDOWN and event.key == player1.save_key:
-            player1.shoot(targets)
+            player1.shoot(targets, bars)
         if event.type == pygame.KEYDOWN and event.key == player2.save_key:
-            player2.shoot(targets)
-        
+            player2.shoot(targets, bars)
+
         player1.update_position()
         player2.update_position()
         player1.move(event)
         player2.move(event)
 
-    
     player1.time = max(0, player1.time - 1 / 60)
     player2.time = max(0, player2.time - 1 / 60)
 
-    
     if player1.time == 0 or player2.time == 0 or player1.bullet == 0 or player2.bullet == 0:
         running = False
 
-   
+    # نمایش زمان
     player1_time_display = font.render(f"Time: {int(player1.time)}", True, black)
     player2_time_display = font.render(f"Time: {int(player2.time)}", True, black)
     screen.blit(player1_time_display, (20, 10))
     screen.blit(player2_time_display, (width - 180, 10))
 
-    
+   
     left_texts = [f"Player 1 Score: {player1.score}", f"Bullet: {player1.bullet}"]
     right_texts = [f"Player 2 Score: {player2.score}", f"Bullet: {player2.bullet}"]
     start_y = 30
@@ -189,13 +203,17 @@ while running:
         screen.blit(right_rendered, (width - 180, start_y))
         start_y += left_rendered.get_height()
 
-    
+   
     for target in targets:
         target.display(screen)
-    player1.draw_dots()
+    for bar in bars:
+        bar.draw_line(screen)
+    player1.draw_dots()  
     player2.draw_dots()
-    
+
     pygame.display.flip()
     clock.tick(60)
+
+
 
 pygame.quit()
