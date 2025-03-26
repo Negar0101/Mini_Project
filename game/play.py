@@ -3,137 +3,181 @@ import pygame_gui
 from pygame_gui.elements import UIButton, UILabel, UITextEntryLine, UIImage
 import random
 import math
-import os  
-os.environ['SDL_VIDEO_CENTERED'] = '1'  # تنظیم محیط برای مرکز کردن پنجره بازی
+import os
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-# راه‌اندازی ماژول Pygame
+# راه‌اندازی ماژول Pygametoday
 pygame.init()
-
 # تعریف ابعاد پنجره بازی
 WIDTH, HEIGHT = 600, 500
-window = pygame.display.set_mode((WIDTH, HEIGHT))  # ایجاد پنجره با ابعاد مشخص
-pygame.display.set_caption("Shooting Game")  # تنظیم عنوان پنجره
+window = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Shooting Game")
+# تعریف رنگ‌ها
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+PURPLE = (128, 0, 128)
+DARK_PURPLE = (50, 0, 50)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+PINK = (255, 105, 180)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+CYAN = (0, 255, 255)
+ORANGE = (255, 165, 0)
+GRAY = (150, 150, 150)
+DARK_GRAY = (50, 50, 50)
+LIGHT_RED = (255, 100, 100)
+LIGHT_BLUE = (100, 100, 255)
 
-# تعریف رنگ‌ها به صورت ثابت (RGB)
-BLACK = (0, 0, 0)  # سیاه
-WHITE = (255, 255, 255)  # سفید
-PURPLE = (128, 0, 128)  # بنفش
-DARK_PURPLE = (50, 0, 50)  # بنفش تیره
-RED = (255, 0, 0)  # قرمز
-GREEN = (0, 255, 0)  # سبز
-PINK = (255, 105, 180)  # صورتی
-BLUE = (0, 0, 255)  # آبی
-YELLOW = (255, 255, 0)  # زرد
-CYAN = (0, 255, 255)  # فیروزه‌ای
-ORANGE = (255, 165, 0)  # نارنجی
-GRAY = (150, 150, 150)  # خاکستری
-DARK_GRAY = (50, 50, 50)  # خاکستری تیره
-LIGHT_RED = (255, 100, 100)  # قرمز روشن
-LIGHT_BLUE = (100, 100, 255)  # آبی روشن
+# تعریف ثابت‌ها برای صحنه‌ها
+MENU_SCENE = 0
+SIGNUP_SCENE = 1
+LOGIN_SCENE = 2
+GAME_SCENE = 3
+current_scene = MENU_SCENE
+player1_done = False  # وضعیت بازیکن 1
+player2_done = False  # وضعیت بازیکن 2
 
-# تعریف ثابت‌ها برای صحنه‌های مختلف بازی
-MENU_SCENE = 0  # صحنه منوی اصلی
-SIGNUP_SCENE = 1  # صحنه ثبت‌نام
-LOGIN_SCENE = 2  # صحنه ورود
-GAME_SCENE = 3  # صحنه بازی
-current_scene = MENU_SCENE  # متغیر برای پیگیری صحنه فعلی (شروع از منو)
+# رابط کاربری بازیکن 1
+menu_manager_p1 = pygame_gui.UIManager((WIDTH, HEIGHT))
+shooting_image_p1 = pygame.image.load("gun.png").convert_alpha()# تصویر اسلحه 
+shooting_image_p1 = pygame.transform.scale(shooting_image_p1, (120, 120))
+target_image_p1 = pygame.image.load("target.png").convert_alpha()# تصویر هدف
+target_image_p1 = pygame.transform.scale(target_image_p1, (30, 30))
+font_p1 = pygame.font.Font(None, 36)
+header_surface_p1 = font_p1.render("Player 1 - Shooting Game", True, WHITE)#متن عنوان
+header_rect_p1 = header_surface_p1.get_rect(center=(WIDTH // 2 + 90, 70))
+# دکمه‌های منوی بازیکن 1
+start_button_p1 = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 150), (150, 50)), text="Sign Up", manager=menu_manager_p1)
+login_button_p1 = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 250), (150, 50)), text="Log In", manager=menu_manager_p1)
+exit_button_p1 = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 350), (150, 50)), text="Exit", manager=menu_manager_p1)
+# مختصات آیکون‌های هدف 
+icon_positions_p1 = [(190, 260), (190, 360), (380, 160), (380, 260), (380, 360), (190, 160)]
+# مدیریت صفحه ثبت‌نام بازیکن 1
+signup_manager_p1 = pygame_gui.UIManager((WIDTH, HEIGHT))
+signup_font_p1 = pygame.font.Font(None, 28)
+signup_header_surface_p1 = signup_font_p1.render("Player 1 - Sign Up", True, WHITE)#متن عنوان
+signup_header_image_p1 = pygame.image.load("gun.png").convert_alpha()#تصویر اسلحه 
+signup_header_image_p1 = pygame.transform.scale(signup_header_image_p1, (80, 80))
+image_signup_p1 = pygame.image.load("target.png").convert_alpha()# تصویر هدف
+image_signup_p1 = pygame.transform.scale(image_signup_p1, (100, 100))
+icon_username_signup_p1 = pygame.image.load("user (3).png").convert_alpha()# آیکون کاربر
+icon_username_signup_p1 = pygame.transform.scale(icon_username_signup_p1, (25, 25))
+icon_password_signup_p1 = pygame.image.load("padlock (3).png").convert_alpha()#آیکون قفل
+icon_password_signup_p1 = pygame.transform.scale(icon_password_signup_p1, (25, 25))
+# مختصات آیکون‌های هدف 
+icon_new_positions_signup_p1 = [(40, 100), (100, 450), (300, 0), (250, 400), (560, 250), (480, 200), (80, 300), (500, 350), (400, 300), (500, 50), (130, 210)]
+username_label_signup_p1 = UILabel(relative_rect=pygame.Rect((200, 170), (100, 30)), text="Username:", manager=signup_manager_p1)#ladel username
+input_box_username_signup_p1 = UITextEntryLine(relative_rect=pygame.Rect((210, 200), (175, 30)), manager=signup_manager_p1)#فیلد ورودی
+icon_username_signup_p1 = UIImage(relative_rect=pygame.Rect((180, 202), (25, 25)), image_surface=icon_username_signup_p1, manager=signup_manager_p1)
+password_label_signup_p1 = UILabel(relative_rect=pygame.Rect((200, 240), (100, 30)), text="Password:", manager=signup_manager_p1)#ladel
+input_box_password_signup_p1 = UITextEntryLine(relative_rect=pygame.Rect((210, 270), (175, 30)), manager=signup_manager_p1)#فیلد ورودی
+icon_password_signup_p1 = UIImage(relative_rect=pygame.Rect((180, 272), (25, 25)), image_surface=icon_password_signup_p1, manager=signup_manager_p1)
+signup_login_button_p1 = UIButton(relative_rect=pygame.Rect((200, 350), (200, 40)), text='Sign Up', manager=signup_manager_p1)# دکمه ثبت‌نام 
+# قرار دادن آیکون‌های هدف 
+icon_new_images_signup_p1 = []
+for pos in icon_new_positions_signup_p1:
+    icon = UIImage(relative_rect=pygame.Rect(pos, (30, 30)), image_surface=image_signup_p1, manager=signup_manager_p1)
+    icon_new_images_signup_p1.append(icon)
+# مدیر رابط کاربری برای صفحه ورود بازیکن 1
+login_manager_p1 = pygame_gui.UIManager((WIDTH, HEIGHT))
+login_font_p1 = pygame.font.Font(None, 28)# متن عنوان
+login_header_surface_p1 = login_font_p1.render("Player 1 - Login", True, WHITE)
+login_header_image_p1 = pygame.image.load("gun.png").convert_alpha()#تصویر اسلحه
+login_header_image_p1 = pygame.transform.scale(login_header_image_p1, (80, 80))
+icon_username_image_login_p1 = pygame.image.load("user (3).png").convert_alpha()#آیکون کاربر
+icon_username_image_login_p1 = pygame.transform.scale(icon_username_image_login_p1, (25, 25))
+icon_password_image_login_p1 = pygame.image.load("padlock (3).png").convert_alpha()#آیکون قفل
+icon_password_image_login_p1 = pygame.transform.scale(icon_password_image_login_p1, (25, 25))
+icon_new_image_login_p1 = pygame.image.load("target.png").convert_alpha()#تصویر هدف
+icon_new_image_login_p1 = pygame.transform.scale(icon_new_image_login_p1, (100, 100))
+# مختصات آیکون‌های هدف 
+icon_new_positions_login_p1 = [(40, 100), (100, 450), (300, 0), (250, 400), (560, 250), (480, 200), (80, 300), (500, 350), (400, 300), (500, 50), (130, 210)]
+# قرار دادن آیکون‌های هدف در صفحه ورود بازیکن 1
+icon_new_images_login_p1 = []
+for pos in icon_new_positions_login_p1:
+    icon = UIImage(relative_rect=pygame.Rect(pos, (30, 30)), image_surface=icon_new_image_login_p1, manager=login_manager_p1)
+    icon_new_images_login_p1.append(icon)
 
-# این شئ برای مدیریت صفحه‌ها ایجاد شده
-menu_manager = pygame_gui.UIManager((WIDTH, HEIGHT))  # مدیر رابط کاربری برای منوی اصلی
-signup_manager = pygame_gui.UIManager((WIDTH, HEIGHT))  # مدیر رابط کاربری برای صفحه ثبت‌نام
-login_manager = pygame_gui.UIManager((WIDTH, HEIGHT))  # مدیر رابط کاربری برای صفحه ورود
+username_label_login_p1 = UILabel(relative_rect=pygame.Rect((200, 170), (100, 30)), text="Username:", manager=login_manager_p1)#ladel
+input_box_username_login_p1 = UITextEntryLine(relative_rect=pygame.Rect((210, 200), (175, 30)), manager=login_manager_p1)#فیلد ورودی
+icon_username_login_p1 = UIImage(relative_rect=pygame.Rect((180, 202), (25, 25)), image_surface=icon_username_image_login_p1, manager=login_manager_p1)
+password_label_login_p1 = UILabel(relative_rect=pygame.Rect((200, 240), (100, 30)), text="Password:", manager=login_manager_p1)#ladel
+input_box_password_login_p1 = UITextEntryLine(relative_rect=pygame.Rect((210, 270), (175, 30)), manager=login_manager_p1)#فیلد ورودی
+icon_password_login_p1 = UIImage(relative_rect=pygame.Rect((180, 272), (25, 25)), image_surface=icon_password_image_login_p1, manager=login_manager_p1)
+login_signup_button_p1 = UIButton(relative_rect=pygame.Rect((200, 350), (200, 40)), text='Log In', manager=login_manager_p1) ## دکمه ورود
 
-# ایجاد صفحه پس‌زمینه
-background = pygame.Surface((WIDTH, HEIGHT))  # سطحی برای پس‌زمینه با ابعاد پنجره
-background.fill(BLACK)  # پر کردن پس‌زمینه با رنگ سیاه
+# رابط کاربری بازیکن 2
+# مدیر رابط کاربری برای منوی بازیکن 2
+menu_manager_p2 = pygame_gui.UIManager((WIDTH, HEIGHT))
+icon_shooting_image_p2 = pygame.image.load("gun.png").convert_alpha()#تصویر اسلحه 
+icon_shooting_image_p2 = pygame.transform.scale(icon_shooting_image_p2, (120, 120))
+icon_target_image_p2 = pygame.image.load("target.png").convert_alpha()# تصویر هدف
+icon_target_image_p2 = pygame.transform.scale(icon_target_image_p2, (30, 30))
+font_p2 = pygame.font.Font(None, 36)#متن عنوان
+header_surface_p2 = font_p2.render("Player 2 - Shooting Game", True, WHITE)
+header_rect_p2 = header_surface_p2.get_rect(center=(WIDTH // 2 + 90, 70))
+# دکمه‌های منوی بازیکن 2
+start_button_p2 = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 150), (150, 50)), text="Sign Up", manager=menu_manager_p2)
+login_button_p2 = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 250), (150, 50)), text="Log In", manager=menu_manager_p2)
+exit_button_p2 = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 350), (150, 50)), text="Exit", manager=menu_manager_p2)
+# مختصات آیکون‌های هدف 
+icon_positions_p2 = [(190, 260), (190, 360), (380, 160), (380, 260), (380, 360), (190, 160)]
 
-# آپلود و تنظیم آیکون‌ها برای منوی اصلی
-icon_shooting_image = pygame.image.load("gun.png").convert_alpha()  # آپلود کردن تصویر اسلحه
-icon_shooting_image = pygame.transform.scale(icon_shooting_image, (120, 120))  # تغییر اندازه تصویر اسلحه
-icon_target_image = pygame.image.load("target.png").convert_alpha()  # آپلود کردن تصویر هدف
-icon_target_image = pygame.transform.scale(icon_target_image, (30, 30))  # تغییر اندازه تصویر هدف
+# مدیر رابط کاربری برای صفحه ثبت‌نام بازیکن 2
+signup_manager_p2 = pygame_gui.UIManager((WIDTH, HEIGHT))
+signup_font_p2 = pygame.font.Font(None, 28)# متن عنوان
+signup_header_surface_p2 = signup_font_p2.render("Player 2 - Sign Up", True, WHITE)
+signup_header_image_p2 = pygame.image.load("gun.png").convert_alpha()#تصویر اسلحه
+signup_header_image_p2 = pygame.transform.scale(signup_header_image_p2, (80, 80))
+icon_new_image_signup_p2 = pygame.image.load("target.png").convert_alpha()#تصویر هدف
+icon_new_image_signup_p2 = pygame.transform.scale(icon_new_image_signup_p2, (100, 100))
+icon_username_signup_p2 = pygame.image.load("user (3).png").convert_alpha()#آیکون کاربر
+icon_username_signup_p2 = pygame.transform.scale(icon_username_signup_p2, (25, 25))
+icon_password_image_signup_p2 = pygame.image.load("padlock (3).png").convert_alpha()#آیکون قفل
+icon_password_image_signup_p2 = pygame.transform.scale(icon_password_image_signup_p2, (25, 25))
+# مختصات آیکون‌های هدف 
+icon_new_positions_signup_p2 = [(40, 100), (100, 450), (300, 0), (250, 400), (560, 250), (480, 200), (80, 300), (500, 350), (400, 300), (500, 50), (130, 210)]
+username_label_signup_p2 = UILabel(relative_rect=pygame.Rect((200, 170), (100, 30)), text="Username:", manager=signup_manager_p2)#ladel
+input_box_username_signup_p2 = UITextEntryLine(relative_rect=pygame.Rect((210, 200), (175, 30)), manager=signup_manager_p2)#فیلد ورودی
+icon_username_signup_p2 = UIImage(relative_rect=pygame.Rect((180, 202), (25, 25)), image_surface=icon_username_signup_p2, manager=signup_manager_p2)
+password_label_signup_p2 = UILabel(relative_rect=pygame.Rect((200, 240), (100, 30)), text="Password:", manager=signup_manager_p2)#ladel
+input_box_password_signup_p2 = UITextEntryLine(relative_rect=pygame.Rect((210, 270), (175, 30)), manager=signup_manager_p2)#فیلد ورودی
+icon_password_signup_p2 = UIImage(relative_rect=pygame.Rect((180, 272), (25, 25)), image_surface=icon_password_image_signup_p2, manager=signup_manager_p2)
+signup_login_button_p2 = UIButton(relative_rect=pygame.Rect((200, 350), (200, 40)), text='Sign Up', manager=signup_manager_p2)# دکمه ثبت‌نام 
+# قرار دادن آیکون‌های هدف 
+icon_new_images_signup_p2 = []
+for pos in icon_new_positions_signup_p2:
+    icon = UIImage(relative_rect=pygame.Rect(pos, (30, 30)), image_surface=icon_new_image_signup_p2, manager=signup_manager_p2)
+    icon_new_images_signup_p2.append(icon)
 
-# ایجاد متن عنوان برای منوی اصلی
-font = pygame.font.Font(None, 48)  # فونت با اندازه ۴۸ (پیش‌فرض سیستم)
-header_surface = font.render("Shooting Game", True, WHITE)  # رندر متن عنوان با رنگ سفید
-header_rect = header_surface.get_rect(center=(350, 70))  # تنظیم موقعیت متن در مرکز بالا
+# مدیر رابط کاربری برای صفحه ورود بازیکن 2
+login_manager_p2 = pygame_gui.UIManager((WIDTH, HEIGHT))
+login_font_p2 = pygame.font.Font(None, 28)#متن عنوان
+login_header_surface_p2 = login_font_p2.render("Player 2 - Login", True, WHITE)
+login_header_image_p2 = pygame.image.load("gun.png").convert_alpha()#تصویر اسلحه
+login_header_image_p2 = pygame.transform.scale(login_header_image_p2, (80, 80))
+icon_username_image_login_p2 = pygame.image.load("user (3).png").convert_alpha()#آیکون کاربر 
+icon_username_image_login_p2 = pygame.transform.scale(icon_username_image_login_p2, (25, 25))
+icon_password_image_login_p2 = pygame.image.load("padlock (3).png").convert_alpha()#آیکون قفل 
+icon_password_image_login_p2 = pygame.transform.scale(icon_password_image_login_p2, (25, 25))
+icon_new_image_login_p2 = pygame.image.load("target.png").convert_alpha()#تصویر هدف
+icon_new_image_login_p2 = pygame.transform.scale(icon_new_image_login_p2, (100, 100))
+# مختصات آیکون‌های هدف 
+icon_new_positions_login_p2 = [(40, 100), (100, 450), (300, 0), (250, 400), (560, 250), (480, 200), (80, 300), (500, 350), (400, 300), (500, 50), (130, 210)]
+# قرار دادن آیکون‌های هدف 
+icon_new_images_login_p2 = []
+for pos in icon_new_positions_login_p2:
+    icon = UIImage(relative_rect=pygame.Rect(pos, (30, 30)), image_surface=icon_new_image_login_p2, manager=login_manager_p2)
+    icon_new_images_login_p2.append(icon)
 
-# ایجاد دکمه‌ها برای منوی اصلی
-start_button = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 150), (150, 50)), text="Sign Up", manager=menu_manager, tool_tip_text="Create a new account")  # دکمه ثبت‌نام در مختصات ((600/2 - 75), 150) با اندازه (150, 50)
-login_button = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 250), (150, 50)), text="Log In", manager=menu_manager, tool_tip_text="Access existing account")  # دکمه ورود در مختصات مرکزی
-exit_button = UIButton(relative_rect=pygame.Rect((WIDTH // 2 - 75, 350), (150, 50)), text="Exit", manager=menu_manager, tool_tip_text="Quit the game")  # دکمه خروج در مختصات مرکزی
-
-icon_positions = [(190, 260), (190, 360), (380, 160), (380, 260), (380, 360), (190, 160)]  # لیستی از مختصات برای قرار دادن آیکون‌های هدف در منو
-
-# صفحه ثبت‌نام (Sign Up)
-signup_font = pygame.font.Font(None, 28)  # فونت با اندازه ۲۸ برای صفحه ثبت‌نام
-signup_header_surface = signup_font.render("Shooting Game", True, WHITE)  # متن عنوان صفحه ثبت‌نام
-signup_header_image = pygame.image.load("gun.png").convert_alpha()  # تصویر اسلحه برای عنوان
-signup_header_image = pygame.transform.scale(signup_header_image, (80, 80))  # تغییر اندازه تصویر اسلحه
-
-# آیکون‌های تزئینی و کاربردی صفحه ثبت‌نام
-icon_new_image_signup = pygame.image.load("target.png").convert_alpha()  # تصویر هدف برای تزئین
-icon_new_image_signup = pygame.transform.scale(icon_new_image_signup, (100, 100))  # تغییر اندازه تصویر هدف
-icon_username_image_signup = pygame.image.load("user (3).png").convert_alpha()  # تصویر آیکون کاربر
-icon_username_image_signup = pygame.transform.scale(icon_username_image_signup, (25, 25))  # تغییر اندازه آیکون کاربر
-icon_password_image_signup = pygame.image.load("padlock (3).png").convert_alpha()  # تصویر آیکون قفل
-icon_password_image_signup = pygame.transform.scale(icon_password_image_signup, (25, 25))  # تغییر اندازه آیکون قفل
-
-icon_new_positions_signup = [(40, 100), (100, 450), (300, 0), (250, 400), (560, 250), (480, 200), (80, 300), (500, 350), (400, 300), (500, 50), (130, 210)]  # مختصات آیکون‌های هدف در صفحه ثبت‌نام
-
-# قسمت نام کاربری در صفحه ثبت‌نام
-username_label_signup = UILabel(relative_rect=pygame.Rect((200, 170), (100, 30)), text="Username:", manager=signup_manager)  # برچسب "Username:" در مختصات (200, 170) با اندازه (100, 30)
-input_box_username_signup = UITextEntryLine(relative_rect=pygame.Rect((210, 200), (175, 30)), manager=signup_manager)  # فیلد متنی برای ورود نام کاربری
-icon_username_signup = UIImage(relative_rect=pygame.Rect((180, 202), (25, 25)), image_surface=icon_username_image_signup, manager=signup_manager)  # تصویر کاربر در کنار جعبه متن
-
-# قسمت رمز عبور در صفحه ثبت‌نام
-password_label_signup = UILabel(relative_rect=pygame.Rect((200, 240), (100, 30)), text="Password:", manager=signup_manager)  # برچسب "Password:"
-input_box_password_signup = UITextEntryLine(relative_rect=pygame.Rect((210, 270), (175, 30)), manager=signup_manager)  # فیلد متنی برای ورود رمز عبور
-icon_password_signup = UIImage(relative_rect=pygame.Rect((180, 272), (25, 25)), image_surface=icon_password_image_signup, manager=signup_manager)  # تصویر قفل در کنار جعبه متن
-
-# دکمه پایانی صفحه ثبت‌نام
-signup_login_button = UIButton(relative_rect=pygame.Rect((200, 350), (200, 40)), text='Sign Up', manager=signup_manager)  # دکمه "Sign Up" برای ثبت‌نام
-
-# حلقه‌ای که آیکون‌های هدف را در مختصات مشخص‌شده قرار می‌دهد
-icon_new_images_signup = []  # لیست برای ذخیره آیکون‌های هدف
-for pos in icon_new_positions_signup:
-    icon = UIImage(relative_rect=pygame.Rect(pos, (30, 30)), image_surface=icon_new_image_signup, manager=signup_manager)  # ایجاد آیکون هدف در هر موقعیت
-    icon_new_images_signup.append(icon)  # اضافه کردن آیکون به لیست
-
-# ایجاد صفحه ورود (Login)
-login_font = pygame.font.Font(None, 28)  # فونت با اندازه ۲۸ برای صفحه ورود
-login_header_surface = login_font.render("Shooting Game", True, (255, 255, 255))  # متن عنوان صفحه ورود
-
-login_header_image = pygame.image.load("gun.png").convert_alpha()  # تصویر اسلحه برای عنوان
-login_header_image = pygame.transform.scale(login_header_image, (80, 80))  # تغییر اندازه تصویر اسلحه
-
-# آیکون‌های صفحه ورود
-icon_username_image_login = pygame.image.load("user (3).png").convert_alpha()  # تصویر آیکون کاربر
-icon_username_image_login = pygame.transform.scale(icon_username_image_login, (25, 25))  # تغییر اندازه آیکون کاربر
-icon_password_image_login = pygame.image.load("padlock (3).png").convert_alpha()  # تصویر آیکون قفل
-icon_password_image_login = pygame.transform.scale(icon_password_image_login, (25, 25))  # تغییر اندازه آیکون قفل
-icon_new_image_login = pygame.image.load("target.png").convert_alpha()  # تصویر هدف برای تزئین
-icon_new_image_login = pygame.transform.scale(icon_new_image_login, (100, 100))  # تغییر اندازه تصویر هدف
-
-icon_new_positions_login = [(40, 100), (100, 450), (300, 0), (250, 400), (560, 250), (480, 200), (80, 300), (500, 350), (400, 300), (500, 50), (130, 210)]  # مختصات آیکون‌های هدف در صفحه ورود
-icon_new_images_login = []  # لیست برای ذخیره آیکون‌های هدف
-for pos in icon_new_positions_login:
-    icon = UIImage(relative_rect=pygame.Rect(pos, (30, 30)), image_surface=icon_new_image_login, manager=login_manager)  # ایجاد آیکون هدف در هر موقعیت
-    icon_new_images_login.append(icon)  # اضافه کردن آیکون به لیست
-
-# قسمت نام کاربری در صفحه ورود
-username_label_login = UILabel(relative_rect=pygame.Rect((200, 170), (100, 30)), text="Username:", manager=login_manager)  # برچسب "Username:"
-input_box_username_login = UITextEntryLine(relative_rect=pygame.Rect((210, 200), (175, 30)), manager=login_manager)  # فیلد متنی برای ورود نام کاربری
-icon_username_login = UIImage(relative_rect=pygame.Rect((180, 202), (25, 25)), image_surface=icon_username_image_login, manager=login_manager)  # تصویر کاربر در کنار جعبه متن
-
-# قسمت رمز عبور در صفحه ورود
-password_label_login = UILabel(relative_rect=pygame.Rect((200, 240), (100, 30)), text="Password:", manager=login_manager)  # برچسب "Password:"
-input_box_password_login = UITextEntryLine(relative_rect=pygame.Rect((210, 270), (175, 30)), manager=login_manager)  # فیلد متنی برای ورود رمز عبور
-icon_password_login = UIImage(relative_rect=pygame.Rect((180, 272), (25, 25)), image_surface=icon_password_image_login, manager=login_manager)  # تصویر قفل در کنار جعبه متن
-
-# دکمه پایانی صفحه ورود
-login_signup_button = UIButton(relative_rect=pygame.Rect((200, 350), (200, 40)), text='Log In', manager=login_manager)  # دکمه "Log In" برای ورود
-
+username_label_login_p2 = UILabel(relative_rect=pygame.Rect((200, 170), (100, 30)), text="Username:", manager=login_manager_p2)#ladel
+input_box_username_login_p2 = UITextEntryLine(relative_rect=pygame.Rect((210, 200), (175, 30)), manager=login_manager_p2)#فیلد ورودی
+icon_username_login_p2 = UIImage(relative_rect=pygame.Rect((180, 202), (25, 25)), image_surface=icon_username_image_login_p2, manager=login_manager_p2)
+password_label_login_p2 = UILabel(relative_rect=pygame.Rect((200, 240), (100, 30)), text="Password:", manager=login_manager_p2)#ladel
+input_box_password_login_p2 = UITextEntryLine(relative_rect=pygame.Rect((210, 270), (175, 30)), manager=login_manager_p2)#فیلد ورودی
+icon_password_login_p2 = UIImage(relative_rect=pygame.Rect((180, 272), (25, 25)), image_surface=icon_password_image_login_p2, manager=login_manager_p2)
+login_signup_button_p2 = UIButton(relative_rect=pygame.Rect((200, 350), (200, 40)), text='Log In', manager=login_manager_p2)# دکمه ورود 
 class GameObject:
     def __init__(self, color, x=None, y=None):
         self.x = x or random.randint(0, 800)
@@ -502,124 +546,180 @@ def display_end_screen(winner):
         pygame.display.flip()
         clock.tick(60)
 
-
+# حلقه اصلی
 running = True
 game_initialized = False
 game_over = False
 
+
 while running:
-    # تنظیم زمان برای به‌روزرسانی فریم‌ها (60 فریم در ثانیه)
+    
     time_delta = clock.tick(60) / 1000.0 if game_initialized else pygame.time.Clock().tick(60) / 1000.0
     
-    # حلقه رویدادها برای بررسی ورودی‌های کاربر
+    # بررسی تمام رویدادهای ورودی (مثل کلیک، فشار کلید و ...)
     for event in pygame.event.get():
-        # اگر کاربر پنجره را ببندد، بسته می‌شود
+        # اگر کاربر پنجره را ببندد، حلقه متوقف می‌شود
         if event.type == pygame.QUIT:
             running = False
-            
-        # اگر کلید Escape زده شود، به منوی اصلی برمی‌گردد یا برنامه بسته می‌شود
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            if current_scene in (SIGNUP_SCENE, LOGIN_SCENE):
-                current_scene = MENU_SCENE
-            elif current_scene == GAME_SCENE:
-                current_scene = MENU_SCENE
-                window = pygame.display.set_mode((WIDTH, HEIGHT))  
-            else:
-                running = False
-                
-        # مدیریت رویدادها در صحنه منوی اصلی
-        if current_scene == MENU_SCENE:
-            menu_manager.process_events(event)
-            
-        # مدیریت رویدادها در صحنه ثبت‌نام
-        elif current_scene == SIGNUP_SCENE:
-            signup_manager.process_events(event)
-        # مدیریت رویدادها در صحنه ورود
-        elif current_scene == LOGIN_SCENE:
-            login_manager.process_events(event)
-        # مدیریت حرکت و شلیک بازیکنان در صحنه بازی
+         
+        # مدیریت رویدادها برای بازیکن 1، اگر هنوز ثبت‌نام یا ورود نکرده باشد
+        if not player1_done:
+            if current_scene == MENU_SCENE:
+                menu_manager_p1.process_events(event)
+            elif current_scene == SIGNUP_SCENE:
+                signup_manager_p1.process_events(event)
+            elif current_scene == LOGIN_SCENE:
+                login_manager_p1.process_events(event)
+       
+        elif player1_done and not player2_done:
+            if current_scene == MENU_SCENE:
+                menu_manager_p2.process_events(event)
+            elif current_scene == SIGNUP_SCENE:
+                signup_manager_p2.process_events(event)
+            elif current_scene == LOGIN_SCENE:
+                login_manager_p2.process_events(event)
+        
         elif current_scene == GAME_SCENE and not game_over:
+            # حرکت بازیکن 1 و 2 
             player1.move(event)
             player2.move(event)
-            # شلیک بازیکن ۱ با کلید مشخص‌شده
+            # شلیک بازیکن 1 با کلید مشخص‌شده
             if event.type == pygame.KEYDOWN and event.key == player1.save_key:
                 player1.shoot(targets, bars, special_items)
-            # شلیک بازیکن ۲ با کلید مشخص‌شده
+            # شلیک بازیکن 2 با کلید مشخص‌شده
             if event.type == pygame.KEYDOWN and event.key == player2.save_key:
                 player2.shoot(targets, bars, special_items)
         
-        # بررسی کلیک روی دکمه‌ها و تغییر صحنه‌ها
+        # بررسی کلیک روی دکمه‌های رابط کاربری
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            # دکمه ثبت‌نام در منوی اصلی
-            if event.ui_element == start_button and current_scene == MENU_SCENE:
-                current_scene = SIGNUP_SCENE
-            # دکمه ورود در منوی اصلی
-            elif event.ui_element == login_button and current_scene == MENU_SCENE:
-                current_scene = LOGIN_SCENE
-            # دکمه خروج در منوی اصلی
-            elif event.ui_element == exit_button and current_scene == MENU_SCENE:
-                running = False
-            # دکمه ثبت‌نام در صفحه ثبت‌نام
-            elif event.ui_element == signup_login_button and current_scene == SIGNUP_SCENE:
-                username = input_box_username_signup.get_text().strip()
-                password = input_box_password_signup.get_text().strip()
-                if username and password:  # اگر نام کاربری و رمز وارد شده باشد
-                    current_scene = GAME_SCENE
-                    if not game_initialized:  # اگر بازی هنوز راه‌اندازی نشده باشد
-                        initialize_game()
-                        game_initialized = True
-            # دکمه ورود در صفحه ورود
-            elif event.ui_element == login_signup_button and current_scene == LOGIN_SCENE:
-                username = input_box_username_login.get_text().strip()
-                password = input_box_password_login.get_text().strip()
-                if username and password:  # اگر نام کاربری و رمز وارد شده باشد
-                    current_scene = GAME_SCENE
-                    if not game_initialized:  # اگر بازی هنوز راه‌اندازی نشده باشد
-                        initialize_game()
-                        game_initialized = True
-
-    # ترسیم و به‌روزرسانی صحنه منوی اصلی
-    if current_scene == MENU_SCENE:
-        menu_manager.update(time_delta)
-        window.fill(BLACK)  # پر کردن پس‌زمینه با رنگ سیاه
-        window.blit(background, (0, 0))  # ترسیم پس‌زمینه
-        pygame.draw.rect(window, DARK_PURPLE, (5, 5, WIDTH - 10, HEIGHT - 10), border_radius=15)  #  ترسیم کادر بزرگ بنفش
-        pygame.draw.rect(window, PURPLE, (0, 0, WIDTH, HEIGHT), 5, border_radius=15)  # ترسیم حاشیه بنفش
-        window.blit(header_surface, header_rect)  # نمایش عنوان بازی
-        window.blit(icon_shooting_image, (100, 20))  # نمایش آیکون اسلحه
-        for pos in icon_positions:  # نمایش آیکون‌های هدف در موقعیت‌های مشخص
-            window.blit(icon_target_image, pos)
-        menu_manager.draw_ui(window)  # ترسیم رابط کاربری منو
-            
-    # ترسیم و به‌روزرسانی صحنه ثبت‌نام
-    elif current_scene == SIGNUP_SCENE:
-        signup_manager.update(time_delta)
-        window.fill(BLACK)  # پر کردن پس‌زمینه با رنگ سیاه
-        window.blit(signup_header_image, (170, 90))  # نمایش آیکون اسلحه در بالا
-        window.blit(signup_header_surface, (250, 120))  # نمایش عنوان بازی
-        pygame.draw.rect(window, PURPLE, (195, 345, 210, 50), 4)  # ترسیم کادر دور دکمه
-        signup_manager.draw_ui(window)  # ترسیم رابط کاربری ثبت‌نام
+            # دکمه‌های بازیکن 1
+            if not player1_done:
+                # دکمه "Sign Up" 
+                if event.ui_element == start_button_p1 and current_scene == MENU_SCENE:
+                    current_scene = SIGNUP_SCENE
+                # دکمه "Log In" 
+                elif event.ui_element == login_button_p1 and current_scene == MENU_SCENE:
+                    current_scene = LOGIN_SCENE
+                # دکمه "Exit" 
+                elif event.ui_element == exit_button_p1 and current_scene == MENU_SCENE:
+                    running = False
+                # دکمه "Sign Up" 
+                elif event.ui_element == signup_login_button_p1 and current_scene == SIGNUP_SCENE:
+                    username = input_box_username_signup_p1.get_text()
+                    password = input_box_password_signup_p1.get_text()
+                    if username and password:  # اگر هر دو فیلد پر باشند
+                        player1_done = True
+                        current_scene = MENU_SCENE
+                # دکمه "Log In" 
+                elif event.ui_element == login_signup_button_p1 and current_scene == LOGIN_SCENE:
+                    username = input_box_username_login_p1.get_text()
+                    password = input_box_password_login_p1.get_text()
+                    if username and password:  # اگر هر دو فیلد پر باشند
+                        player1_done = True
+                        current_scene = MENU_SCENE
+         
+            # دکمه‌های بازیکن 2
+            elif player1_done and not player2_done:
+                # دکمه "Sign Up" 
+                if event.ui_element == start_button_p2 and current_scene == MENU_SCENE:
+                    current_scene = SIGNUP_SCENE
+                # دکمه "Log In" 
+                elif event.ui_element == login_button_p2 and current_scene == MENU_SCENE:
+                    current_scene = LOGIN_SCENE
+                # دکمه "Exit" 
+                elif event.ui_element == exit_button_p2 and current_scene == MENU_SCENE:
+                    running = False
+                # اطلاعات تأیید و بازی شروع می‌شود
+                elif event.ui_element == signup_login_button_p2 and current_scene == SIGNUP_SCENE:
+                    username = input_box_username_signup_p2.get_text()
+                    password = input_box_password_signup_p2.get_text()
+                    if username and password:  # اگر هر دو فیلد پر باشند
+                        player2_done = True
+                        current_scene = GAME_SCENE
+                        if not game_initialized:  # اگر بازی هنوز مقداردهی نشده باشد
+                            initialize_game()
+                            game_initialized = True
+                # اطلاعات تأیید و بازی شروع می‌شود
+                elif event.ui_element == login_signup_button_p2 and current_scene == LOGIN_SCENE:
+                    username = input_box_username_login_p2.get_text()
+                    password = input_box_password_login_p2.get_text()
+                    if username and password:  # اگر هر دو فیلد پر باشند
+                        player2_done = True
+                        current_scene = GAME_SCENE
+                        if not game_initialized:  # اگر بازی هنوز مقداردهی نشده باشد
+                            initialize_game()
+                            game_initialized = True
+                        
+    # ترسیم رابط کاربری برای بازیکن 1
+    if not player1_done:
+        if current_scene == MENU_SCENE:
+            # به‌روزرسانی و ترسیم منوی بازیکن 1
+            menu_manager_p1.update(time_delta)
+            window.fill(BLACK)  
+            pygame.draw.rect(window, DARK_PURPLE, (5, 5, WIDTH - 10, HEIGHT - 10), border_radius=15)  
+            pygame.draw.rect(window, PURPLE, (0, 0, WIDTH, HEIGHT), 5, border_radius=15) 
+            window.blit(header_surface_p1, header_rect_p1)
+            window.blit(shooting_image_p1, (100, 20)) 
+            for pos in icon_positions_p1:  
+                window.blit(target_image_p1, pos)
+            menu_manager_p1.draw_ui(window) 
+        elif current_scene == SIGNUP_SCENE:
+            # به‌روزرسانی و ترسیم صفحه ثبت‌نام بازیکن 1
+            signup_manager_p1.update(time_delta)
+            window.fill(BLACK)
+            window.blit(signup_header_image_p1, (170, 90))  
+            window.blit(signup_header_surface_p1, (250, 120))  
+            pygame.draw.rect(window, PURPLE, (195, 345, 210, 50), 4)  
+            signup_manager_p1.draw_ui(window)  
+        elif current_scene == LOGIN_SCENE:
+            # به‌روزرسانی و ترسیم صفحه ورود بازیکن 1
+            login_manager_p1.update(time_delta)
+            window.fill(BLACK)
+            window.blit(login_header_image_p1, (170, 90))  # تصویر عنوان
+            window.blit(login_header_surface_p1, (250, 120))  # متن عنوان
+            pygame.draw.rect(window, PURPLE, (195, 345, 210, 50), 4)  # حاشیه دکمه
+            login_manager_p1.draw_ui(window)  # ترسیم فیلدها و دکمه
     
-    # ترسیم و به‌روزرسانی صحنه ورود
-    elif current_scene == LOGIN_SCENE:
-        login_manager.update(time_delta)
-        window.fill(BLACK)  # پر کردن پس‌زمینه با رنگ سیاه
-        window.blit(login_header_image, (170, 90))  # نمایش آیکون اسلحه در بالا
-        window.blit(login_header_surface, (250, 120))  # نمایش عنوان بازی
-        pygame.draw.rect(window, PURPLE, (195, 345, 210, 50), 4)  # ترسیم کادر دور دکمه
-        login_manager.draw_ui(window)  # ترسیم رابط کاربری ورود
+    # ترسیم رابط کاربری برای بازیکن 2
+    elif player1_done and not player2_done:
+        if current_scene == MENU_SCENE:
+            # به‌روزرسانی و ترسیم منوی بازیکن 2
+            menu_manager_p2.update(time_delta)
+            window.fill(BLACK)
+            pygame.draw.rect(window, DARK_PURPLE, (5, 5, WIDTH - 10, HEIGHT - 10), border_radius=15)
+            pygame.draw.rect(window, PURPLE, (0, 0, WIDTH, HEIGHT), 5, border_radius=15)
+            window.blit(header_surface_p2, header_rect_p2)
+            window.blit(icon_shooting_image_p2, (100, 20))
+            for pos in icon_positions_p2:
+                window.blit(icon_target_image_p2, pos)
+            menu_manager_p2.draw_ui(window)
+        elif current_scene == SIGNUP_SCENE:
+            # به‌روزرسانی و ترسیم صفحه ثبت‌نام بازیکن 2
+            signup_manager_p2.update(time_delta)
+            window.fill(BLACK)
+            window.blit(signup_header_image_p2, (170, 90))
+            window.blit(signup_header_surface_p2, (250, 120))
+            pygame.draw.rect(window, PURPLE, (195, 345, 210, 50), 4)
+            signup_manager_p2.draw_ui(window)
+        elif current_scene == LOGIN_SCENE:
+            # به‌روزرسانی و ترسیم صفحه ورود بازیکن 2
+            login_manager_p2.update(time_delta)
+            window.fill(BLACK)
+            window.blit(login_header_image_p2, (170, 90))
+            window.blit(login_header_surface_p2, (250, 120))
+            pygame.draw.rect(window, PURPLE, (195, 345, 210, 50), 4)
+            login_manager_p2.draw_ui(window)
     
-    # مدیریت و ترسیم صحنه بازی
+    # ترسیم صحنه بازی
     elif current_scene == GAME_SCENE:
-        if not game_over:  # اگر بازی تمام نشده باشد
-            window.fill(WHITE)  # پر کردن پس‌زمینه با رنگ سفید
-            # کاهش زمان بازیکنان
+        if not game_over:  
+            window.fill(WHITE) 
             player1.time = max(0, player1.time - 1/60)
             player2.time = max(0, player2.time - 1/60)
-            # بررسی پایان بازی (زمان یا گلوله‌ها صفر شود)
+            # بررسی شرایط پایان بازی 
             if (player1.time == 0 and player2.time == 0) or (player1.bullet == 0 and player2.bullet == 0):
                 game_over = True
-                # تعیین برنده بازی
+                # تعیین برنده بر اساس امتیاز
                 if player1.score > player2.score:
                     winner = "Player 1"
                 elif player2.score > player1.score:
@@ -627,27 +727,28 @@ while running:
                 else:
                     winner = "Draw"
             
-            # تولید آیتم‌های ویژه در صورت کمبود
+            # تولید آیتم‌های ویژه اگر کمتر از 3 تا باشند
             if len(special_items) < 3:
                 for i in range(3 - len(special_items)):
-                    spawn_counters[i] += 1
-                    if spawn_counters[i] >= spawn_delays[i]:  # اگر زمان تولید فرا رسیده باشد
+                    spawn_counters[i] += 1 # افزایش شمارنده تولید برای آیتم i
+                    if spawn_counters[i] >= spawn_delays[i]:
+                        # ایجاد یک آیتم ویژه جدید با نوع تصادفی از special_types
                         new_item = SpecialItem(random.choice(special_types))
                         special_items.append(new_item)
-                        spawn_delays[i] = random.randint(60, 300)  # تنظیم تاخیر جدید
-                        spawn_counters[i] = 0  # ریست شمارنده
+                        spawn_delays[i] = random.randint(60, 300)# تنظیم یک تأخیر تصادفی جدید (بین 60 تا 300 فریم) برای تولید بعدی
+                        spawn_counters[i] = 0
             
             # به‌روزرسانی آیتم‌های ویژه
             for item in special_items[:]:
                 item.update()
 
-            # نمایش زمان باقیمانده بازیکنان
+            # نمایش زمان بازیکنان
             player1_time_display = font.render(f"Time: {int(player1.time)}", True, BLACK)
             player2_time_display = font.render(f"Time: {int(player2.time)}", True, BLACK)
             window.blit(player1_time_display, (20, 10))
             window.blit(player2_time_display, (800 - 180, 10))
 
-            # نمایش امتیاز و تعداد گلوله‌های بازیکنان
+            # نمایش امتیاز و گلوله‌ها
             left_texts = [f"Player 1 Score: {player1.score}", f"Bullet: {player1.bullet}"]
             right_texts = [f"Player 2 Score: {player2.score}", f"Bullet: {player2.bullet}"]
             start_y = 30
@@ -658,22 +759,20 @@ while running:
                 window.blit(right_rendered, (800 - 180, start_y))
                 start_y += left_rendered.get_height()
 
-            # ترسیم اهداف، میله‌ها و آیتم‌های ویژه
+            # ترسیم اهداف، موانع، آیتم‌ها و نقاط بازیکنان
             for target in targets:
                 target.display(window)
             for bar in bars:
                 bar.display(window)
             for item in special_items:
                 item.display(window)
-            # ترسیم شلیک‌های بازیکنان
             player1.display_dots(window)
             player2.display_dots(window)
         else:
-            # نمایش صفحه پایان بازی
+            # نمایش صفحه پایان بازی با برنده
             display_end_screen(winner)
     
-    # به‌روزرسانی صفحه نمایش
     pygame.display.flip()
 
-# بستن Pygame و پایان برنامه
+
 pygame.quit()
